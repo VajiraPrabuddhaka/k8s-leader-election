@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"math/rand"
 	"os"
 	"time"
 
@@ -32,10 +33,10 @@ func getNewLock(lockname, podname, namespace string) *resourcelock.LeaseLock {
 }
 
 func doStuff() {
-	for {
-		klog.Info("doing stuff...")
-		time.Sleep(5 * time.Second)
-	}
+	// for {
+	klog.Info("doing stuff...")
+	time.Sleep(5 * time.Second)
+	// }
 }
 
 func runLeaderElection(lock *resourcelock.LeaseLock, ctx context.Context, id string) {
@@ -87,9 +88,18 @@ func main() {
 		klog.Fatalf("failed to get kubeconfig")
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	// ctx, cancel := context.WithCancel(context.Background())
 
 	lock := getNewLock(leaseLockName, podName, leaseLockNamespace)
-	runLeaderElection(lock, ctx, podName)
+	for {
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+		defer cancel()
+		runLeaderElection(lock, ctx, podName)
+		rand.Seed(time.Now().UnixNano())
+		min := 1
+		max := 5
+		n := rand.Intn(max-min+1) + min
+		klog.Infof("runLeaderElection returned.. running again in %v secs..", n)
+		time.Sleep(time.Duration(n) * time.Second)
+	}
 }
