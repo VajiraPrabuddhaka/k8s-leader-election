@@ -1,6 +1,6 @@
 module github.com/mayankshah1607/k8s-leader-election
 
-go 1.18
+go 1.19
 
 require (
 	k8s.io/apimachinery v0.22.2

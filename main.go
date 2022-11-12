@@ -58,7 +58,7 @@ func runLeaderElection(lock *resourcelock.LeaseLock, ctx context.Context, id str
 					klog.Info("still the leader!")
 					return
 				}
-				klog.Info("new leader is %s", current_id)
+				klog.Infof("new leader is %s", current_id)
 			},
 		},
 	})
@@ -94,6 +94,7 @@ func main() {
 	for {
 		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 		defer cancel()
+		klog.Info("running leader election")
 		runLeaderElection(lock, ctx, podName)
 		rand.Seed(time.Now().UnixNano())
 		min := 1
